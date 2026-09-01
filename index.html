@@ -2,113 +2,468 @@
 <html>
 <head>
   <meta charset="UTF-8">
-  <meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+
+  <meta
+    name="viewport"
+    content="width=device-width, initial-scale=1, viewport-fit=cover"
+  >
+
   <title>MindAR Dual Video AR</title>
 
+  <!-- A-Frame -->
   <script src="https://aframe.io/releases/1.4.2/aframe.min.js"></script>
+
+  <!-- MindAR -->
   <script src="https://cdn.jsdelivr.net/npm/mind-ar@1.2.5/dist/mindar-image-aframe.prod.js"></script>
 
   <style>
-    html, body { margin:0; padding:0; width:100%; height:100%; overflow:hidden; background:transparent!important; }
-    body { position:fixed; inset:0; }
-    video { object-fit:cover; }
+    html,
+    body {
+      margin: 0;
+      padding: 0;
+      width: 100%;
+      height: 100%;
+      overflow: hidden;
+      background: transparent !important;
+    }
+
+    body {
+      position: fixed;
+      inset: 0;
+    }
+
+    video {
+      object-fit: cover;
+    }
+
     #status {
-      position:fixed; left:50%; bottom:22px; transform:translateX(-50%);
-      z-index:20; color:white; background:rgba(0,0,0,.55);
-      padding:10px 14px; border-radius:999px;
-      font:14px/1.2 -apple-system,BlinkMacSystemFont,"Segoe UI",sans-serif;
-      pointer-events:none; white-space:nowrap;
+      position: fixed;
+      left: 50%;
+      bottom: 22px;
+      transform: translateX(-50%);
+      z-index: 20;
+
+      color: white;
+      background: rgba(0, 0, 0, 0.55);
+
+      padding: 10px 14px;
+      border-radius: 999px;
+
+      font: 14px/1.2
+        -apple-system,
+        BlinkMacSystemFont,
+        "Segoe UI",
+        sans-serif;
+
+      pointer-events: none;
+      white-space: nowrap;
     }
   </style>
 </head>
 
 <body>
-<div id="status">請允許相機，然後對準圖片</div>
 
-<a-scene
-  mindar-image="imageTargetSrc: ./targets.mind; autoStart: true; uiScanning: yes; uiLoading: yes; uiError: yes;"
-  color-space="sRGB"
-  renderer="colorManagement: true, physicallyCorrectLights: true, alpha: true;"
-  vr-mode-ui="enabled: false"
-  device-orientation-permission-ui="enabled: false"
-  embedded>
+  <!-- 狀態提示 -->
+  <div id="status">
+    請允許相機，然後對準圖片
+  </div>
 
-  <a-assets timeout="15000">
-    <video id="video1" src="./dog.mp4" preload="auto" loop muted playsinline webkit-playsinline crossorigin="anonymous"></video>
-    <video id="video2" src="./cat.mp4" preload="auto" loop muted playsinline webkit-playsinline crossorigin="anonymous"></video>
-  </a-assets>
 
-  <a-camera position="0 0 0" look-controls="enabled: false"></a-camera>
+  <!-- ============================= -->
+  <!-- MindAR Scene                  -->
+  <!-- ============================= -->
 
-  <a-entity id="target" mindar-image-target="targetIndex: 0">
-    <a-video
-      src="#video1"
-      position="0 0 0.010"
-      width="1"
-      height="0.5637"
-      material="shader: flat;">
-    </a-video>
+  <a-scene
 
-    <a-video
-      src="#video2"
-      position="0 0 0.020"
-      width="1"
-      height="0.5637"
-      material="shader: flat; transparent: true;">
-    </a-video>
-  </a-entity>
-</a-scene>
+    mindar-image="
+      imageTargetSrc: ./targets.mind;
+      autoStart: true;
+      uiScanning: yes;
+      uiLoading: yes;
+      uiError: yes;
+    "
 
-<script>
-  const scene = document.querySelector("a-scene");
-  const target = document.querySelector("#target");
-  const video1 = document.querySelector("#video1");
-  const video2 = document.querySelector("#video2");
-  const status = document.querySelector("#status");
+    color-space="sRGB"
 
-  scene.addEventListener("arReady", () => {
-    status.textContent = "相機已啟動，請對準圖片";
-    setTimeout(() => {
-      const videos = [...document.querySelectorAll("video")];
-      const cameraVideo = videos.find(v => v.id !== "video1" && v.id !== "video2");
-      if (cameraVideo) {
-        cameraVideo.setAttribute("playsinline", "");
-        cameraVideo.setAttribute("webkit-playsinline", "");
-        Object.assign(cameraVideo.style, {
-          position:"fixed", inset:"0", width:"100%", height:"100%",
-          objectFit:"cover", zIndex:"-2", display:"block",
-          visibility:"visible", opacity:"1", background:"transparent"
-        });
-        cameraVideo.play().catch(() => {});
+    renderer="
+      colorManagement: true;
+      physicallyCorrectLights: true;
+      alpha: true;
+    "
+
+    vr-mode-ui="enabled: false"
+
+    device-orientation-permission-ui="enabled: false"
+
+    embedded
+  >
+
+
+    <!-- ============================= -->
+    <!-- Video Assets                  -->
+    <!-- ============================= -->
+
+    <a-assets timeout="15000">
+
+      <!-- 第一條影片 -->
+
+      <video
+        id="video1"
+
+        src="./dog.mp4"
+
+        preload="auto"
+
+        loop
+
+        muted
+
+        playsinline
+
+        webkit-playsinline
+
+        crossorigin="anonymous">
+      </video>
+
+
+      <!-- 第二條影片 -->
+
+      <video
+        id="video2"
+
+        src="./cat.mp4"
+
+        preload="auto"
+
+        loop
+
+        muted
+
+        playsinline
+
+        webkit-playsinline
+
+        crossorigin="anonymous">
+      </video>
+
+    </a-assets>
+
+
+
+    <!-- ============================= -->
+    <!-- Camera                        -->
+    <!-- ============================= -->
+
+    <a-camera
+
+      position="0 0 0"
+
+      look-controls="enabled: false">
+
+    </a-camera>
+
+
+
+    <!-- ============================= -->
+    <!-- Image Target                  -->
+    <!-- ============================= -->
+
+    <a-entity
+
+      id="target"
+
+      mindar-image-target="targetIndex: 0">
+
+
+      <!-- ========================= -->
+      <!-- 左邊：DOG                -->
+      <!-- ========================= -->
+
+      <a-video
+
+        src="#video1"
+
+        position="-0.27 0 0.01"
+
+        width="0.50"
+
+        height="0.282"
+
+        material="
+          shader: flat;
+        ">
+
+      </a-video>
+
+
+
+      <!-- ========================= -->
+      <!-- 右邊：CAT                -->
+      <!-- ========================= -->
+
+      <a-video
+
+        src="#video2"
+
+        position="0.27 0 0.02"
+
+        width="0.50"
+
+        height="0.300"
+
+        material="
+          shader: flat;
+        ">
+
+      </a-video>
+
+
+    </a-entity>
+
+  </a-scene>
+
+
+
+  <!-- ============================= -->
+  <!-- JavaScript                    -->
+  <!-- ============================= -->
+
+  <script>
+
+    /* ----------------------------- */
+    /* Elements                      */
+    /* ----------------------------- */
+
+    const scene =
+      document.querySelector("a-scene");
+
+    const target =
+      document.querySelector("#target");
+
+    const video1 =
+      document.querySelector("#video1");
+
+    const video2 =
+      document.querySelector("#video2");
+
+    const status =
+      document.querySelector("#status");
+
+
+
+    /* ----------------------------- */
+    /* MindAR Camera Ready           */
+    /* ----------------------------- */
+
+    scene.addEventListener(
+      "arReady",
+      () => {
+
+        status.textContent =
+          "相機已啟動，請對準圖片";
+
+
+        /*
+         * iPhone Safari
+         * Camera background fix
+         */
+
+        setTimeout(() => {
+
+          const videos =
+            [
+              ...document.querySelectorAll(
+                "video"
+              )
+            ];
+
+
+          /*
+           * 找出 MindAR 建立的
+           * Camera Video
+           */
+
+          const cameraVideo =
+            videos.find(
+              video =>
+                video.id !== "video1" &&
+                video.id !== "video2"
+            );
+
+
+          if (cameraVideo) {
+
+            cameraVideo.setAttribute(
+              "playsinline",
+              ""
+            );
+
+            cameraVideo.setAttribute(
+              "webkit-playsinline",
+              ""
+            );
+
+
+            Object.assign(
+              cameraVideo.style,
+              {
+
+                position: "fixed",
+
+                inset: "0",
+
+                width: "100%",
+
+                height: "100%",
+
+                objectFit: "cover",
+
+                zIndex: "-2",
+
+                display: "block",
+
+                visibility: "visible",
+
+                opacity: "1",
+
+                background: "transparent"
+
+              }
+            );
+
+
+            cameraVideo
+              .play()
+              .catch(() => {});
+
+          }
+
+
+
+          /*
+           * AR Canvas
+           */
+
+          const canvas =
+            document.querySelector(
+              "canvas"
+            );
+
+
+          if (canvas) {
+
+            canvas.style.background =
+              "transparent";
+
+            canvas.style.position =
+              "fixed";
+
+            canvas.style.inset =
+              "0";
+
+            canvas.style.zIndex =
+              "0";
+
+          }
+
+        }, 300);
+
       }
-      const canvas = document.querySelector("canvas");
-      if (canvas) {
-        canvas.style.background = "transparent";
-        canvas.style.position = "fixed";
-        canvas.style.inset = "0";
-        canvas.style.zIndex = "0";
+    );
+
+
+
+    /* ----------------------------- */
+    /* Camera Error                  */
+    /* ----------------------------- */
+
+    scene.addEventListener(
+      "arError",
+      () => {
+
+        status.textContent =
+          "相機啟動失敗，請重新整理並允許相機";
+
       }
-    }, 300);
-  });
+    );
 
-  scene.addEventListener("arError", () => {
-    status.textContent = "相機啟動失敗，請重新整理並允許相機";
-  });
 
-  target.addEventListener("targetFound", async () => {
-    status.textContent = "已辨認圖片";
-    video1.pause();
-    video2.pause();
-    video1.currentTime = 0;
-    video2.currentTime = 0;
-    await Promise.allSettled([video1.play(), video2.play()]);
-  });
 
-  target.addEventListener("targetLost", () => {
-    status.textContent = "請重新對準圖片";
-    video1.pause();
-    video2.pause();
-  });
-</script>
+    /* ============================= */
+    /* IMAGE FOUND                   */
+    /* ============================= */
+
+    target.addEventListener(
+      "targetFound",
+      async () => {
+
+        status.textContent =
+          "已辨認圖片";
+
+
+        /*
+         * 先停止兩條影片
+         */
+
+        video1.pause();
+
+        video2.pause();
+
+
+
+        /*
+         * 回到影片開頭
+         *
+         * 確保每次重新掃描
+         * 都由 0 秒開始
+         */
+
+        video1.currentTime = 0;
+
+        video2.currentTime = 0;
+
+
+
+        /*
+         * 同時播放
+         */
+
+        await Promise.allSettled(
+          [
+
+            video1.play(),
+
+            video2.play()
+
+          ]
+        );
+
+      }
+    );
+
+
+
+    /* ============================= */
+    /* IMAGE LOST                    */
+    /* ============================= */
+
+    target.addEventListener(
+      "targetLost",
+      () => {
+
+        status.textContent =
+          "請重新對準圖片";
+
+
+        video1.pause();
+
+        video2.pause();
+
+      }
+    );
+
+  </script>
+
+
 </body>
 </html>
