@@ -3,53 +3,26 @@
 <head>
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
-  <title>MindAR Christmas AR</title>
+  <title>MindAR Dual Video AR</title>
 
   <script src="https://aframe.io/releases/1.4.2/aframe.min.js"></script>
   <script src="https://cdn.jsdelivr.net/npm/mind-ar@1.2.5/dist/mindar-image-aframe.prod.js"></script>
 
   <style>
-    html, body {
-      margin: 0;
-      padding: 0;
-      width: 100%;
-      height: 100%;
-      overflow: hidden;
-      background: transparent !important;
-    }
-
-    body {
-      position: fixed;
-      inset: 0;
-    }
-
-    video {
-      object-fit: cover;
-    }
-
-    .mindar-ui-overlay {
-      z-index: 10;
-    }
-
+    html, body { margin:0; padding:0; width:100%; height:100%; overflow:hidden; background:transparent!important; }
+    body { position:fixed; inset:0; }
+    video { object-fit:cover; }
     #status {
-      position: fixed;
-      left: 50%;
-      bottom: 22px;
-      transform: translateX(-50%);
-      z-index: 20;
-      color: white;
-      background: rgba(0,0,0,.55);
-      padding: 10px 14px;
-      border-radius: 999px;
-      font: 14px/1.2 -apple-system, BlinkMacSystemFont, "Segoe UI", sans-serif;
-      pointer-events: none;
-      white-space: nowrap;
+      position:fixed; left:50%; bottom:22px; transform:translateX(-50%);
+      z-index:20; color:white; background:rgba(0,0,0,.55);
+      padding:10px 14px; border-radius:999px;
+      font:14px/1.2 -apple-system,BlinkMacSystemFont,"Segoe UI",sans-serif;
+      pointer-events:none; white-space:nowrap;
     }
   </style>
 </head>
 
 <body>
-
 <div id="status">請允許相機，然後對準圖片</div>
 
 <a-scene
@@ -60,59 +33,52 @@
   device-orientation-permission-ui="enabled: false"
   embedded>
 
-  <a-assets timeout="10000">
-    <video
-      id="christmasAnimation"
-      src="./dog.mp4"
-      preload="auto"
-      loop
-      muted
-      playsinline
-      webkit-playsinline
-      crossorigin="anonymous">
-    </video>
+  <a-assets timeout="15000">
+    <video id="video1" src="./dog.mp4" preload="auto" loop muted playsinline webkit-playsinline crossorigin="anonymous"></video>
+    <video id="video2" src="./cat.mp4" preload="auto" loop muted playsinline webkit-playsinline crossorigin="anonymous"></video>
   </a-assets>
 
-  <a-camera
-    position="0 0 0"
-    look-controls="enabled: false">
-  </a-camera>
+  <a-camera position="0 0 0" look-controls="enabled: false"></a-camera>
 
   <a-entity id="target" mindar-image-target="targetIndex: 0">
     <a-video
-      src="#christmasAnimation"
-      position="0 0 0.01"
+      src="#video1"
+      position="0 0 0.010"
+      width="1"
+      height="0.5637"
+      material="shader: flat;">
+    </a-video>
+
+    <a-video
+      src="#video2"
+      position="0 0 0.020"
       width="1"
       height="0.5637"
       material="shader: flat; transparent: true;">
     </a-video>
   </a-entity>
-
 </a-scene>
 
 <script>
   const scene = document.querySelector("a-scene");
   const target = document.querySelector("#target");
-  const video = document.querySelector("#christmasAnimation");
+  const video1 = document.querySelector("#video1");
+  const video2 = document.querySelector("#video2");
   const status = document.querySelector("#status");
 
   scene.addEventListener("arReady", () => {
     status.textContent = "相機已啟動，請對準圖片";
     setTimeout(() => {
-      const cameraVideo = document.querySelector("video:not(#christmasAnimation)");
+      const videos = [...document.querySelectorAll("video")];
+      const cameraVideo = videos.find(v => v.id !== "video1" && v.id !== "video2");
       if (cameraVideo) {
         cameraVideo.setAttribute("playsinline", "");
         cameraVideo.setAttribute("webkit-playsinline", "");
-        cameraVideo.style.position = "fixed";
-        cameraVideo.style.inset = "0";
-        cameraVideo.style.width = "100%";
-        cameraVideo.style.height = "100%";
-        cameraVideo.style.objectFit = "cover";
-        cameraVideo.style.zIndex = "-2";
-        cameraVideo.style.display = "block";
-        cameraVideo.style.visibility = "visible";
-        cameraVideo.style.opacity = "1";
-        cameraVideo.style.background = "transparent";
+        Object.assign(cameraVideo.style, {
+          position:"fixed", inset:"0", width:"100%", height:"100%",
+          objectFit:"cover", zIndex:"-2", display:"block",
+          visibility:"visible", opacity:"1", background:"transparent"
+        });
         cameraVideo.play().catch(() => {});
       }
       const canvas = document.querySelector("canvas");
@@ -131,14 +97,18 @@
 
   target.addEventListener("targetFound", async () => {
     status.textContent = "已辨認圖片";
-    try { await video.play(); } catch (e) {}
+    video1.pause();
+    video2.pause();
+    video1.currentTime = 0;
+    video2.currentTime = 0;
+    await Promise.allSettled([video1.play(), video2.play()]);
   });
 
   target.addEventListener("targetLost", () => {
     status.textContent = "請重新對準圖片";
-    video.pause();
+    video1.pause();
+    video2.pause();
   });
 </script>
-
 </body>
 </html>
